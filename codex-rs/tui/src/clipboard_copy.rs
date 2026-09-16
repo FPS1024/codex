@@ -193,7 +193,7 @@ fn is_wsl_session() -> bool {
 /// triggers `os_log` / `NSLog` output on stderr. Because the TUI owns the
 /// terminal, that stray output corrupts the display. We temporarily redirect
 /// fd 2 to `/dev/null` around the call to keep the screen clean.
-#[cfg(not(target_os = "android"))]
+#[cfg(not(any(target_os = "android", target_os = "ios")))]
 fn arboard_copy(text: &str, html: Option<&str>) -> Result<Option<ClipboardLease>, String> {
     #[cfg(target_os = "macos")]
     let _stderr_lock = STDERR_SUPPRESSION_MUTEX
@@ -224,6 +224,11 @@ fn arboard_copy(text: &str, html: Option<&str>) -> Result<Option<ClipboardLease>
 #[cfg(target_os = "android")]
 fn arboard_copy(_text: &str, _html: Option<&str>) -> Result<Option<ClipboardLease>, String> {
     Err("native clipboard unavailable on Android".to_string())
+}
+
+#[cfg(target_os = "ios")]
+fn arboard_copy(_text: &str, _html: Option<&str>) -> Result<Option<ClipboardLease>, String> {
+    Err("native clipboard unavailable on iOS; falling back to OSC 52".to_string())
 }
 
 /// Copy text into the Windows clipboard from a WSL process.
@@ -329,10 +334,16 @@ impl Drop for SuppressStderr {
     }
 }
 
-#[cfg(not(target_os = "macos"))]
+#[cfg(all(
+    not(target_os = "macos"),
+    not(any(target_os = "android", target_os = "ios"))
+))]
 struct SuppressStderr;
 
-#[cfg(not(target_os = "macos"))]
+#[cfg(all(
+    not(target_os = "macos"),
+    not(any(target_os = "android", target_os = "ios"))
+))]
 impl SuppressStderr {
     fn new() -> Self {
         Self

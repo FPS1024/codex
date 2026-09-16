@@ -626,7 +626,15 @@ fn validate_unix_peer_owner(_stream: &std::os::unix::net::UnixStream) -> std::io
     Ok(())
 }
 
-#[cfg(unix)]
+#[cfg(any(
+    target_os = "linux",
+    target_os = "android",
+    target_os = "macos",
+    target_os = "freebsd",
+    target_os = "openbsd",
+    target_os = "netbsd",
+    target_os = "dragonfly"
+))]
 fn ensure_peer_uid_matches_current_user(peer_uid: libc::uid_t) -> std::io::Result<()> {
     if peer_uid != unsafe { libc::getuid() } {
         return Err(permission_denied_io_error(

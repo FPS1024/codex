@@ -1,7 +1,21 @@
-#[cfg(unix)]
+#[cfg(any(
+    target_os = "linux",
+    target_os = "android",
+    target_os = "macos",
+    target_os = "freebsd",
+    target_os = "netbsd",
+    target_os = "openbsd"
+))]
 use std::ffi::OsString;
 
-#[cfg(unix)]
+#[cfg(any(
+    target_os = "linux",
+    target_os = "android",
+    target_os = "macos",
+    target_os = "freebsd",
+    target_os = "netbsd",
+    target_os = "openbsd"
+))]
 use std::os::unix::ffi::OsStrExt;
 
 /// This is designed to be called pre-main() (using `#[ctor::ctor]`) to perform
@@ -99,7 +113,14 @@ pub(crate) fn pre_main_hardening_macos() {
     remove_env_vars_with_prefix(b"DYLD_");
 }
 
-#[cfg(unix)]
+#[cfg(any(
+    target_os = "linux",
+    target_os = "android",
+    target_os = "macos",
+    target_os = "freebsd",
+    target_os = "netbsd",
+    target_os = "openbsd"
+))]
 fn set_core_file_size_limit_to_zero() {
     let rlim = libc::rlimit {
         rlim_cur: 0,
@@ -121,7 +142,14 @@ pub(crate) fn pre_main_hardening_windows() {
     // TODO(mbolin): Perform the appropriate configuration for Windows.
 }
 
-#[cfg(unix)]
+#[cfg(any(
+    target_os = "linux",
+    target_os = "android",
+    target_os = "macos",
+    target_os = "freebsd",
+    target_os = "netbsd",
+    target_os = "openbsd"
+))]
 fn remove_env_vars_with_prefix(prefix: &[u8]) {
     for key in env_keys_with_prefix(std::env::vars_os(), prefix) {
         unsafe {
@@ -130,7 +158,14 @@ fn remove_env_vars_with_prefix(prefix: &[u8]) {
     }
 }
 
-#[cfg(unix)]
+#[cfg(any(
+    target_os = "linux",
+    target_os = "android",
+    target_os = "macos",
+    target_os = "freebsd",
+    target_os = "netbsd",
+    target_os = "openbsd"
+))]
 fn env_keys_with_prefix<I>(vars: I, prefix: &[u8]) -> Vec<OsString>
 where
     I: IntoIterator<Item = (OsString, OsString)>,
