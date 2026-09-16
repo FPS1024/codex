@@ -9,3 +9,20 @@ rustflags = ["-C", "link-arg=/STACK:8388608", "-C", "link-arg=/arm64hazardfree"]
 
 [target.'cfg(all(windows, target_env = "gnu"))']
 rustflags = ["-C", "link-arg=-Wl,--stack,8388608"]
+
+# Jailbroken iOS builds are pinned to the SDK supplied with this workspace.
+# Do not fall back to the SDK bundled with the host Xcode installation.
+# The SDK directory is named 15.6, but its SDKSettings.json reports iOS 15.5.
+[target.aarch64-apple-ios]
+linker = "/Users/malacaihongpi/Codex/Source/codex/codex-rs/scripts/ios-clang"
+rustflags = [
+    "-C", "link-arg=-isysroot",
+    "-C", "link-arg=/Users/malacaihongpi/Codex/SDKs/iPhoneOS15.6.sdk",
+    "-C", "link-arg=-miphoneos-version-min=15.5",
+]
+
+[env]
+CC_aarch64_apple_ios = { value = "clang", force = true }
+CXX_aarch64_apple_ios = { value = "clang++", force = true }
+CFLAGS_aarch64_apple_ios = { value = "-target arm64-apple-ios15.5 -isysroot /Users/malacaihongpi/Codex/SDKs/iPhoneOS15.6.sdk -fno-stack-check -mno-stack-arg-probe", force = true }
+CXXFLAGS_aarch64_apple_ios = { value = "-target arm64-apple-ios15.5 -isysroot /Users/malacaihongpi/Codex/SDKs/iPhoneOS15.6.sdk -fno-stack-check -mno-stack-arg-probe", force = true }
