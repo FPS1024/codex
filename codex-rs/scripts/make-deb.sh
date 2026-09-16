@@ -123,9 +123,9 @@ else
     trap 'cleanup; rm -rf "${DEB_TMP}"' EXIT
 
     printf '2.0\n' > "${DEB_TMP}/debian-binary"
-    tar --uid 0 --gid 0 --uname root --gname wheel \
+    tar --format ustar \
         -czf "${DEB_TMP}/control.tar.gz" -C "${CONTROL_DIR}" .
-    tar --uid 0 --gid 0 --uname root --gname wheel \
+    tar --format ustar \
         --exclude './DEBIAN' \
         -czf "${DEB_TMP}/data.tar.gz" -C "${PKG_ROOT}" .
 
