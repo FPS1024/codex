@@ -60,6 +60,25 @@ signature with `ldid -S`.
 report that the file is unsigned. The `LC_CODE_SIGNATURE` load command added by
 `ldid` is the relevant signature for the jailbroken installation flow.
 
+## Debian package
+
+Create an installable rootless iOS package with:
+
+```bash
+cd codex-rs
+./scripts/make-deb.sh
+```
+
+The package is written to:
+
+```text
+dist/codex_<version>_iphoneos-arm64.deb
+```
+
+It installs the executable at `/var/jb/usr/bin/codex` and documentation under
+`/var/jb/usr/share/doc/codex`. The package `postinst` script reapplies the
+`ldid -S` signature after installation.
+
 ## Install on iPhone
 
 The destination differs between rootful and rootless jailbreaks. Use the
