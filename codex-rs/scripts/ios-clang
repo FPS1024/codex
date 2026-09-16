@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+readonly SDK_PATH="/Users/malacaihongpi/Codex/SDKs/iPhoneOS15.6.sdk"
+readonly CLANG="/Users/malacaihongpi/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang"
+
+if [[ ! -d "${SDK_PATH}" ]]; then
+    echo "required iPhoneOS 15.6 SDK not found: ${SDK_PATH}" >&2
+    exit 1
+fi
+
+if [[ ! -x "${CLANG}" ]]; then
+    echo "required clang not found: ${CLANG}" >&2
+    exit 1
+fi
+
+args=()
+skip_next=false
+for arg in "$@"; do
+    if [[ "${skip_next}" == true ]]; then
+        skip_next=false
+        continue
+    fi
+
+    case "${arg}" in
+        -isysroot)
+            skip_next=true
+            ;;
+        -isysroot=*|-mios-version-min=*|-miphoneos-version-min=*)
+            ;;
+        *)
+            args+=("${arg}")
+            ;;
+    esac
+done
+
+exec "${CLANG}" \
+    "${args[@]}" \
+    -target arm64-apple-ios15.5 \
+    -isysroot "${SDK_PATH}" \
+    -miphoneos-version-min=15.5 \
+    -fno-stack-check \
+    -mno-stack-arg-probe
