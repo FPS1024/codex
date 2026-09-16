@@ -1,7 +1,9 @@
 use std::path::Path;
 use std::path::PathBuf;
+#[cfg(not(any(target_os = "android", target_os = "ios")))]
 use tempfile::Builder;
 
+#[cfg_attr(target_os = "ios", allow(dead_code))]
 #[derive(Debug, Clone)]
 pub enum PasteImageError {
     ClipboardUnavailable(String),
@@ -47,7 +49,7 @@ pub struct PastedImageInfo {
 }
 
 /// Capture image from system clipboard, encode to PNG, and return bytes + info.
-#[cfg(not(target_os = "android"))]
+#[cfg(not(any(target_os = "android", target_os = "ios")))]
 pub fn paste_image_as_png() -> Result<(Vec<u8>, PastedImageInfo), PasteImageError> {
     let _span = tracing::debug_span!("paste_image_as_png").entered();
     tracing::debug!("attempting clipboard image read");
@@ -116,8 +118,16 @@ pub fn paste_image_as_png() -> Result<(Vec<u8>, PastedImageInfo), PasteImageErro
     ))
 }
 
+#[cfg(target_os = "ios")]
+#[allow(dead_code)]
+pub fn paste_image_as_png() -> Result<(Vec<u8>, PastedImageInfo), PasteImageError> {
+    Err(PasteImageError::ClipboardUnavailable(
+        "clipboard image paste is unsupported on iOS".into(),
+    ))
+}
+
 /// Convenience: write to a temp file and return its path + info.
-#[cfg(not(target_os = "android"))]
+#[cfg(not(any(target_os = "android", target_os = "ios")))]
 pub fn paste_image_to_temp_png() -> Result<(PathBuf, PastedImageInfo), PasteImageError> {
     // First attempt: read image from system clipboard via arboard (native paths or image data).
     match paste_image_as_png() {
@@ -233,6 +243,13 @@ pub fn paste_image_to_temp_png() -> Result<(PathBuf, PastedImageInfo), PasteImag
     // Keep error consistent with paste_image_as_png.
     Err(PasteImageError::ClipboardUnavailable(
         "clipboard image paste is unsupported on Android".into(),
+    ))
+}
+
+#[cfg(target_os = "ios")]
+pub fn paste_image_to_temp_png() -> Result<(PathBuf, PastedImageInfo), PasteImageError> {
+    Err(PasteImageError::ClipboardUnavailable(
+        "clipboard image paste is unsupported on iOS".into(),
     ))
 }
 
